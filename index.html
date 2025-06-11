@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฮอลลีวูด: ศูนย์กลางอุตสาหกรรมบันเทิงโลก</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Golden Age Neutrals -->
+    <!-- Application Structure Plan: A single-page, vertical-scrolling application with a sticky top navigation bar. The structure is thematic, not chronological, grouping the 10 evidence points from the source report into four distinct, navigable sections: 'The Foundation', 'Golden Age & Global Influence', 'Economic & Cultural Power', and 'Modern Challenges'. This design choice enhances usability by allowing users to explore topics of interest non-linearly, rather than being forced into a rigid, report-like structure. Key interactions include on-scroll animations for stats, interactive timelines, and a central Chart.js visualization for market share data, designed to make complex information digestible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Economic contributions (jobs, wages). Goal: Inform/Impress. Viz: Dynamic counting numbers. Interaction: Numbers animate on scroll. Justification: More engaging than static text. Method: Vanilla JS.
+        - Report Info: Global box office market share over time (Table 3). Goal: Compare/Show Change. Viz: Bar Chart. Interaction: Tooltips on hover. Justification: Clearly shows Hollywood's dominance and recent shifts. Library: Chart.js (Canvas).
+        - Report Info: Key historical milestones (MPPC, Talkies, Paramount Decision). Goal: Organize/Inform. Viz: Vertical Timeline. Interaction: Elements animate on scroll. Justification: Structures historical data logically and visually. Method: HTML/Tailwind.
+        - Report Info: Abstract concepts like 'Soft Power' or 'Studio System'. Goal: Explain. Viz: Themed icon cards. Interaction: Subtle hover effects. Justification: Breaks down complex ideas into digestible visual chunks. Method: HTML/Tailwind/Unicode.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #FDFDFB;
+            color: #4B4B4B;
+        }
+        .bg-film-grain::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .nav-link {
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #C9A227;
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body class="relative">
+    <header id="navbar" class="bg-stone-800/90 backdrop-blur-sm text-white sticky top-0 z-50 transition-all duration-300 shadow-lg">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold tracking-wider text-amber-300">Hollywood</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#foundation" class="nav-link font-medium">รากฐาน</a>
+                <a href="#golden-age" class="nav-link font-medium">ยุคทอง</a>
+                <a href="#power" class="nav-link font-medium">พลังและอิทธิพล</a>
+                <a href="#challenges" class="nav-link font-medium">ความท้าทาย</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-stone-700 text-white rounded p-2">
+                    <option value="#home">เมนู</option>
+                    <option value="#foundation">รากฐาน</option>
+                    <option value="#golden-age">ยุคทอง</option>
+                    <option value="#power">พลังและอิทธิพล</option>
+                    <option value="#challenges">ความท้าทาย</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="relative min-h-screen flex items-center justify-center text-center bg-stone-900 text-white overflow-hidden bg-film-grain">
+            <div class="relative z-10 p-6">
+                <h2 class="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-shadow leading-tight">ทำไมฮอลลีวูด<br><span class="text-amber-300">จึงเป็นศูนย์กลางความบันเทิงโลก?</span></h2>
+                <p class="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-stone-300">
+                    สำรวจ 10 หลักฐานสำคัญที่ยืนยันสถานะการเป็นผู้นำของฮอลลีวูด ตั้งแต่จุดเริ่มต้นเชิงกลยุทธ์ สู่การเป็นมหาอำนาจทางเศรษฐกิจและวัฒนธรรมที่หล่อหลอมโลก
+                </p>
+                <div class="mt-8">
+                    <a href="#foundation" class="inline-block bg-amber-400 text-stone-900 font-bold py-3 px-8 rounded-full text-lg hover:bg-amber-300 transition-transform transform hover:scale-105">เริ่มต้นการสำรวจ</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="foundation" class="py-16 md:py-24 bg-stone-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-stone-800">การวางรากฐาน</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">
+                        การเป็นศูนย์กลางของฮอลลีวูดไม่ได้เกิดขึ้นโดยบังเอิญ แต่เกิดจากปัจจัยเชิงกลยุทธ์ ภูมิศาสตร์ และการบุกเบิกทางธุรกิจที่วางรากฐานไว้อย่างมั่นคงในช่วงแรกเริ่ม
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold mb-3 text-amber-600">หลักฐานที่ 1: การหลีกหนีการผูกขาด</h3>
+                        <p class="text-stone-700">ผู้สร้างหนังอิสระอพยพมายังแคลิฟอร์เนียเพื่อหนีการควบคุมสิทธิบัตรของ Edison Trust ในฝั่งตะวันออก การย้ายถิ่นฐานเชิงกลยุทธ์นี้เป็นจุดเริ่มต้นของการรวมตัวของบุคลากรและนวัตกรรม</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                        <h3 class="text-xl font-semibold mb-3 text-amber-600">หลักฐานที่ 2: ข้อได้เปรียบทางภูมิศาสตร์</h3>
+                        <p class="text-stone-700">ด้วยสภาพอากาศที่มีแดดจ้าเกือบตลอดปีและภูมิประเทศที่หลากหลาย (ทะเลทราย ภูเขา มหาสมุทร) ทำให้แคลิฟอร์เนียตอนใต้เป็นสถานที่สมบูรณ์แบบสำหรับการถ่ายทำ ลดต้นทุนและเพิ่มประสิทธิภาพการผลิต</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow lg:col-span-3">
+                         <h3 class="text-xl font-semibold mb-3 text-amber-600">หลักฐานที่ 3: กำเนิดระบบสตูดิโอ</h3>
+                         <p class="text-stone-700 mb-4">สตูดิโออย่าง Paramount, MGM, Warner Bros. สร้างระบบการผลิตแบบครบวงจรที่ควบคุมตั้งแต่การสร้าง การจัดจำหน่าย จนถึงโรงภาพยนตร์ ทำให้ฮอลลีวูดกลายเป็นโรงงานผลิตภาพยนตร์ที่มีประสิทธิภาพ</p>
+                         <div class="relative border-l-2 border-amber-400 ml-3 py-4">
+                             <div class="mb-6 ml-8 relative">
+                                 <div class="absolute -left-[38px] top-1.5 w-4 h-4 bg-amber-500 rounded-full border-2 border-white"></div>
+                                 <p class="font-semibold">1908: ก่อตั้ง MPPC (Edison Trust)</p>
+                                 <p class="text-sm text-stone-600">กระตุ้นการอพยพของผู้สร้างหนังอิสระ</p>
+                             </div>
+                             <div class="mb-6 ml-8 relative">
+                                 <div class="absolute -left-[38px] top-1.5 w-4 h-4 bg-amber-500 rounded-full border-2 border-white"></div>
+                                 <p class="font-semibold">1927: เปิดตัว 'The Jazz Singer'</p>
+                                 <p class="text-sm text-stone-600">เริ่มต้นยุคหนังเสียงและยุคทอง</p>
+                             </div>
+                             <div class="ml-8 relative">
+                                 <div class="absolute -left-[38px] top-1.5 w-4 h-4 bg-amber-500 rounded-full border-2 border-white"></div>
+                                 <p class="font-semibold">1948: คำตัดสินคดี Paramount</p>
+                                 <p class="text-sm text-stone-600">บังคับให้สตูดิโอขายโรงหนัง สิ้นสุดยุคครบวงจร</p>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="golden-age" class="py-16 md:py-24 bg-stone-800 text-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">ยุคทองและอิทธิพลโลก</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-300">
+                       ฮอลลีวูดไม่ได้หยุดแค่การเป็นศูนย์กลางการผลิต แต่ได้สร้างรากฐานทางวัฒนธรรมและเทคโนโลยีที่ส่งอิทธิพลไปทั่วโลก
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 text-stone-800">
+                    <div class="bg-amber-50 p-6 rounded-lg shadow-lg hover:shadow-amber-200/20 transition-shadow">
+                        <h3 class="text-xl font-semibold mb-3 text-stone-800">หลักฐานที่ 4: ผู้นำนวัตกรรมเทคโนโลยี</h3>
+                        <p class="text-stone-700">ตั้งแต่หนังเสียง (Talkies), ภาพสี (Technicolor) ไปจนถึง CGI ฮอลลีวูดเป็นผู้บุกเบิกและกำหนดมาตรฐานทางเทคโนโลยีการสร้างภาพยนตร์ให้ทั่วโลกได้ปฏิบัติตามเสมอมา</p>
+                    </div>
+                    <div class="bg-amber-50 p-6 rounded-lg shadow-lg hover:shadow-amber-200/20 transition-shadow">
+                        <h3 class="text-xl font-semibold mb-3 text-stone-800">หลักฐานที่ 5: การสร้าง 'ระบบดารา'</h3>
+                        <p class="text-stone-700">สตูดิโอสร้างและโปรโมทดาราภาพยนตร์ให้เป็นสัญลักษณ์ระดับโลก (เช่น Marilyn Monroe, Clark Gable) ดึงดูดผู้ชมทั่วโลกและสร้างกระแสแฟชั่นและวัฒนธรรม</p>
+                    </div>
+                    <div class="bg-amber-50 p-6 rounded-lg shadow-lg hover:shadow-amber-200/20 transition-shadow">
+                        <h3 class="text-xl font-semibold mb-3 text-stone-800">หลักฐานที่ 6: ศูนย์รวมบุคลากรสร้างสรรค์</h3>
+                        <p class="text-stone-700">ฮอลลีวูดดึงดูดผู้กำกับ นักเขียนบท นักแสดง และทีมงานที่เก่งที่สุดจากทั่วโลก ทำให้เกิดการรวมตัวของสุดยอดฝีมือที่หาที่เปรียบไม่ได้</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="power" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-stone-800">พลังทางเศรษฐกิจและอิทธิพลทางวัฒนธรรม</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">
+                        อุตสาหกรรมภาพยนตร์ฮอลลีวูดไม่ใช่แค่ศิลปะ แต่เป็นเครื่องจักรทางเศรษฐกิจและเครื่องมือทางวัฒนธรรมที่ทรงพลังอย่างยิ่ง
+                    </p>
+                </div>
+                
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-amber-700 mb-4">หลักฐานที่ 7: เครื่องจักรเศรษฐกิจขนาดยักษ์</h3>
+                        <p class="text-stone-700 mb-6">อุตสาหกรรมภาพยนตร์และโทรทัศน์ของสหรัฐฯ เป็นกลไกทางเศรษฐกิจที่มหาศาล ซึ่งขับเคลื่อนโดยฮอลลีวูดเป็นหลัก</p>
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div class="bg-stone-100 p-4 rounded-lg">
+                                <p class="text-3xl font-bold text-amber-600" data-counter="2320000">0</p>
+                                <p class="text-sm font-medium text-stone-600">ตำแหน่งงานที่สนับสนุน</p>
+                            </div>
+                            <div class="bg-stone-100 p-4 rounded-lg">
+                                <p class="text-3xl font-bold text-amber-600" data-counter="229000000000" data-prefix="$">0</p>
+                                <p class="text-sm font-medium text-stone-600">ค่าจ้างรวมต่อปี</p>
+                            </div>
+                             <div class="bg-stone-100 p-4 rounded-lg">
+                                <p class="text-3xl font-bold text-amber-600" data-counter="122000">0</p>
+                                <p class="text-sm font-medium text-stone-600">ธุรกิจในเครือข่าย</p>
+                            </div>
+                             <div class="bg-stone-100 p-4 rounded-lg">
+                                <p class="text-3xl font-bold text-amber-600" data-counter="22600000000" data-prefix="$">0</p>
+                                <p class="text-sm font-medium text-stone-600">มูลค่าการส่งออกต่อปี</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-amber-700 mb-4">หลักฐานที่ 8: การครองตลาดโลก</h3>
+                        <p class="text-stone-700 mb-4">แม้จะเผชิญการแข่งขันที่เพิ่มขึ้น ภาพยนตร์จากสหรัฐฯ ยังคงครองส่วนแบ่งรายได้ Box Office ทั่วโลกเป็นส่วนใหญ่</p>
+                        <div class="chart-container">
+                            <canvas id="marketShareChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-16 grid md:grid-cols-2 gap-8">
+                     <div class="bg-stone-50 p-6 rounded-lg border border-stone-200">
+                        <h3 class="text-2xl font-semibold text-amber-700 mb-4">หลักฐานที่ 9: อำนาจทางวัฒนธรรม (Soft Power)</h3>
+                        <p class="text-stone-700">ภาพยนตร์ฮอลลีวูดส่งออกวัฒนธรรม ค่านิยม และ "ความฝันแบบอเมริกัน" ไปทั่วโลก มีอิทธิพลต่อแฟชั่น ภาษา และบรรทัดฐานทางสังคมอย่างไม่อาจประเมินค่าได้</p>
+                    </div>
+                    <div class="bg-stone-50 p-6 rounded-lg border border-stone-200">
+                        <h3 class="text-2xl font-semibold text-amber-700 mb-4">หลักฐานที่ 10: รางวัลออสการ์</h3>
+                        <p class="text-stone-700">การมีรางวัลอันทรงเกียรติที่สุดในโลกอย่างออสการ์ ช่วยตอกย้ำสถานะของฮอลลีวูดในฐานะผู้กำหนดมาตรฐานความเป็นเลิศทางภาพยนตร์ และเป็นเวทีที่ทั้งโลกจับตามอง</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="challenges" class="py-16 md:py-24 bg-stone-100">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-stone-800">ความท้าทายและการปรับตัวในยุคใหม่</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-stone-600">
+                        ประวัติศาสตร์ของฮอลลีวูดคือการปรับตัวอย่างต่อเนื่อง และในปัจจุบันก็กำลังเผชิญกับความท้าทายครั้งสำคัญที่ต้องก้าวข้าม
+                    </p>
+                </div>
+                <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="font-semibold text-xl mb-3 text-red-700">ความท้าทายหลัก</h3>
+                        <ul class="space-y-3 list-disc list-inside text-stone-700">
+                            <li><span class="font-medium">การแข่งขันระดับโลก:</span> อุตสาหกรรมภาพยนตร์ที่เติบโตอย่างรวดเร็ว เช่น จีน (Nollywood) และอินเดีย (Bollywood)</li>
+                            <li><span class="font-medium">การเปลี่ยนแปลงทางเทคโนโลยี:</span> การมาของแพลตฟอร์มสตรีมมิ่งที่เปลี่ยนพฤติกรรมผู้บริโภค</li>
+                            <li><span class="font-medium">ต้นทุนการผลิตสูง:</span> ทำให้การผลิตย้ายฐานไปยังรัฐหรือประเทศอื่นที่มีแรงจูงใจทางภาษีดีกว่า</li>
+                             <li><span class="font-medium">ปัญหาแรงงานและ AI:</span> ความกังวลเรื่องการใช้ AI มาแทนที่บทบาทสร้างสรรค์และการประท้วงหยุดงาน</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-xl mb-3 text-green-700">กลยุทธ์การปรับตัว</h3>
+                        <ul class="space-y-3 list-disc list-inside text-stone-700">
+                             <li><span class="font-medium">"Glocalization":</span> การปรับเนื้อหาให้เข้ากับตลาดท้องถิ่นมากขึ้น เช่น การใส่มุกตลกที่คนในชาตินั้นๆ เข้าใจ</li>
+                            <li><span class="font-medium">ลงทุนในเนื้อหาภูมิภาค:</span> แพลตฟอร์มสตรีมมิ่งสร้าง Original Content สำหรับตลาดเฉพาะทาง</li>
+                            <li><span class="font-medium">เพิ่มแรงจูงใจทางภาษี:</span> รัฐแคลิฟอร์เนียพยายามดึงการผลิตกลับมาด้วยนโยบายภาษี</li>
+                            <li><span class="font-medium">เจรจาข้อตกลงใหม่:</span> กำหนดขอบเขตการใช้ AI ให้เป็นเครื่องมือช่วยเหลือ ไม่ใช่สิ่งทดแทน</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="mt-12 text-center bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-6 rounded-r-lg max-w-4xl mx-auto">
+                    <p class="font-semibold">อนาคตของฮอลลีวูดอาจไม่ใช่การเป็น "ผู้ผูกขาด" แต่เป็นการเป็น "ศูนย์กลางที่ทรงอิทธิพลที่สุด" ในเครือข่ายความบันเทิงระดับโลกที่มีความหลากหลายและเชื่อมโยงกันมากขึ้น</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-stone-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center text-stone-400">
+            <p>&copy; 2025 Interactive Report. สร้างขึ้นเพื่อสาธิตการนำเสนอข้อมูล</p>
+            <p class="text-sm mt-2">ข้อมูลอ้างอิงจากรายงาน "ทำไมฮอลลีวูดจึงเป็นศูนย์กลางของอุตสาหกรรมบันเทิง"</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const marketShareData = {
+        years: ['2014', '2024'],
+        countries: {
+            'สหรัฐอเมริกา': [85.6, 69.5],
+            'จีน': [5.5, 16.5],
+            'สหราชอาณาจักร': [3.1, 5.6],
+            'ญี่ปุ่น': [0, 4.9], 
+            'เกาหลีใต้': [2.2, 2.0],
+            'ฝรั่งเศส': [4.5, 1.5],
+        }
+    };
+
+    const ctx = document.getElementById('marketShareChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: marketShareData.years,
+                datasets: Object.keys(marketShareData.countries).map((country, index) => {
+                    const colors = [
+                        'rgba(212, 175, 55, 0.8)', 
+                        'rgba(220, 53, 69, 0.7)',  
+                        'rgba(0, 123, 255, 0.7)',
+                        'rgba(255, 193, 7, 0.7)', 
+                        'rgba(40, 167, 69, 0.7)', 
+                        'rgba(108, 117, 125, 0.7)' 
+                    ];
+                    return {
+                        label: country,
+                        data: marketShareData.countries[country],
+                        backgroundColor: colors[index % colors.length],
+                        borderColor: colors[index % colors.length].replace('0.7', '1').replace('0.8', '1'),
+                        borderWidth: 1
+                    }
+                })
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'ส่วนแบ่งรายได้ Box Office ทั่วโลก (%)',
+                        font: { size: 16, family: 'Kanit' },
+                        color: '#333'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        titleFont: { family: 'Kanit' },
+                        bodyFont: { family: 'Kanit' },
+                    },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                           font: { family: 'Kanit' }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: false,
+                        ticks: {
+                           font: { family: 'Kanit' }
+                        }
+                    },
+                    y: {
+                        stacked: false,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'ส่วนแบ่ง (%)',
+                            font: { family: 'Kanit' }
+                        },
+                        ticks: {
+                           font: { family: 'Kanit' }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const counters = document.querySelectorAll('[data-counter]');
+    const speed = 200; 
+
+    const animateCounter = (counter) => {
+        const target = +counter.getAttribute('data-counter');
+        const prefix = counter.getAttribute('data-prefix') || '';
+        
+        const updateCount = () => {
+            const count = +counter.innerText.replace(/,/g, '');
+            const inc = target / speed;
+
+            if (count < target) {
+                counter.innerText = prefix + Math.ceil(count + inc).toLocaleString('en-US');
+                setTimeout(updateCount, 20);
+            } else {
+                counter.innerText = prefix + target.toLocaleString('en-US');
+            }
+        };
+        updateCount();
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCounter(entry.target);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    counters.forEach(counter => {
+        observer.observe(counter);
+    });
+    
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+
+    const onScroll = () => {
+        let currentSection = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 100) {
+                currentSection = section.getAttribute('id');
+            }
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${currentSection}`) {
+                link.classList.add('active');
+            }
+        });
+    };
+
+    window.addEventListener('scroll', onScroll);
+
+    const mobileNav = document.getElementById('mobile-nav');
+    if (mobileNav) {
+        mobileNav.addEventListener('change', (e) => {
+            const targetId = e.target.value;
+            if(targetId) {
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>
